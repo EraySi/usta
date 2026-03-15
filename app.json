@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "Yetis Ustam",
+    "slug": "yetis-ustam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light"
+  }
+}
