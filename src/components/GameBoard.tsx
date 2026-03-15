@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import type { BoardCellModel, GameBoardModel } from '../game/models/board';
+import { PipePreview } from './PipePreview';
 
 type GameBoardProps = {
   board: GameBoardModel;
@@ -27,7 +28,7 @@ type BoardCellProps = {
 function BoardCell({ cell }: BoardCellProps) {
   return (
     <View style={styles.cell}>
-      <Text style={styles.cellText}>{cell.pipeType ?? ''}</Text>
+      <PipePreview pipe={cell.pipe} />
     </View>
   );
 }
@@ -52,10 +53,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#111111',
     backgroundColor: '#FFFFFF',
-  },
-  cellText: {
-    color: '#555555',
-    fontSize: 12,
-    fontWeight: '500',
   },
 });
