@@ -16,9 +16,9 @@ const INITIAL_PIPES: Array<{
   column: number;
   pipe: PipeModel;
 }> = [
-  { row: 1, column: 1, pipe: { type: 'straight' } },
-  { row: 2, column: 3, pipe: { type: 'corner' } },
-  { row: 4, column: 2, pipe: { type: 'tee' } },
+  { row: 1, column: 1, pipe: { type: 'straight', orientation: 'horizontal' } },
+  { row: 2, column: 3, pipe: { type: 'corner', orientation: 'right-down' } },
+  { row: 4, column: 2, pipe: { type: 'tee', orientation: 'up-right-down' } },
 ];
 
 export function createInitialBoard(size: number = BOARD_SIZE): GameBoardModel {
