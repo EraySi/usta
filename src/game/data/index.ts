@@ -1,2 +1,1 @@
-// Future static game content and level data will live here.
-export {};
+export * from './world1-levels';
