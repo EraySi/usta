@@ -1,7 +1,77 @@
 export const PIPE_TYPES = ['straight', 'corner', 'tee'] as const;
+export const DIRECTIONS = ['up', 'right', 'down', 'left'] as const;
 
 export type PipeType = (typeof PIPE_TYPES)[number];
+export type Direction = (typeof DIRECTIONS)[number];
 
-export type PipeModel = {
-  type: PipeType;
+export type StraightOrientation = 'horizontal' | 'vertical';
+export type CornerOrientation =
+  | 'up-right'
+  | 'right-down'
+  | 'down-left'
+  | 'left-up';
+export type TeeOrientation =
+  | 'up-right-down'
+  | 'right-down-left'
+  | 'down-left-up'
+  | 'left-up-right';
+
+export type StraightPipe = {
+  type: 'straight';
+  orientation: StraightOrientation;
 };
+
+export type CornerPipe = {
+  type: 'corner';
+  orientation: CornerOrientation;
+};
+
+export type TeePipe = {
+  type: 'tee';
+  orientation: TeeOrientation;
+};
+
+export type PipeModel = StraightPipe | CornerPipe | TeePipe;
+
+const OPPOSITE_DIRECTIONS: Record<Direction, Direction> = {
+  up: 'down',
+  right: 'left',
+  down: 'up',
+  left: 'right',
+};
+
+const STRAIGHT_CONNECTIONS: Record<StraightOrientation, readonly Direction[]> = {
+  horizontal: ['left', 'right'],
+  vertical: ['up', 'down'],
+};
+
+const CORNER_CONNECTIONS: Record<CornerOrientation, readonly Direction[]> = {
+  'up-right': ['up', 'right'],
+  'right-down': ['right', 'down'],
+  'down-left': ['down', 'left'],
+  'left-up': ['left', 'up'],
+};
+
+const TEE_CONNECTIONS: Record<TeeOrientation, readonly Direction[]> = {
+  'up-right-down': ['up', 'right', 'down'],
+  'right-down-left': ['right', 'down', 'left'],
+  'down-left-up': ['down', 'left', 'up'],
+  'left-up-right': ['left', 'up', 'right'],
+};
+
+export function getOppositeDirection(direction: Direction): Direction {
+  return OPPOSITE_DIRECTIONS[direction];
+}
+
+export function getPipeConnections(pipe: PipeModel): readonly Direction[] {
+  switch (pipe.type) {
+    case 'straight':
+      return STRAIGHT_CONNECTIONS[pipe.orientation];
+    case 'corner':
+      return CORNER_CONNECTIONS[pipe.orientation];
+    case 'tee':
+      return TEE_CONNECTIONS[pipe.orientation];
+    default:
+      return [];
+  }
+}
