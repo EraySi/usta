@@ -1,23 +1,44 @@
-export const BOARD_SIZE = 6;
+import type { PipeModel } from './pipes';
 
-export type PipeType = null;
+export const BOARD_SIZE = 6;
 
 export type BoardCellModel = {
   id: string;
   row: number;
   column: number;
-  pipeType: PipeType;
+  pipe: PipeModel | null;
 };
 
 export type GameBoardModel = BoardCellModel[][];
 
+const INITIAL_PIPES: Array<{
+  row: number;
+  column: number;
+  pipe: PipeModel;
+}> = [
+  { row: 1, column: 1, pipe: { type: 'straight' } },
+  { row: 2, column: 3, pipe: { type: 'corner' } },
+  { row: 4, column: 2, pipe: { type: 'tee' } },
+];
+
 export function createInitialBoard(size: number = BOARD_SIZE): GameBoardModel {
-  return Array.from({ length: size }, (_, row) =>
+  const board = Array.from({ length: size }, (_, row) =>
     Array.from({ length: size }, (_, column) => ({
       id: `${row}-${column}`,
       row,
       column,
-      pipeType: null,
+      pipe: null,
     })),
   );
+
+  INITIAL_PIPES.forEach(({ row, column, pipe }) => {
+    if (row < size && column < size) {
+      board[row][column] = {
+        ...board[row][column],
+        pipe,
+      };
+    }
+  });
+
+  return board;
 }
