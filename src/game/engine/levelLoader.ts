@@ -20,6 +20,7 @@ export function createBoardFromLevel(level: LevelData): GameBoardModel {
 
       if (matchesPosition(level.source, position)) {
         cell.cellType = 'source';
+        cell.endpointDirection = level.source.direction;
         continue;
       }
 
@@ -29,6 +30,7 @@ export function createBoardFromLevel(level: LevelData): GameBoardModel {
 
       if (matchingTarget) {
         cell.cellType = 'target';
+        cell.endpointDirection = matchingTarget.direction;
         cell.targetId = matchingTarget.id;
         continue;
       }

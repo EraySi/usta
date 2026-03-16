@@ -1,4 +1,4 @@
-import type { PipeModel } from './pipes';
+import type { Direction, PipeModel } from './pipes';
 
 export const BOARD_SIZE = 6;
 
@@ -10,6 +10,7 @@ export type BoardCellModel = {
   column: number;
   pipe: PipeModel | null;
   cellType: BoardCellType;
+  endpointDirection: Direction | null;
   targetId: string | null;
 };
 
@@ -23,6 +24,7 @@ export function createBoard(size: number = BOARD_SIZE): GameBoardModel {
       column,
       pipe: null,
       cellType: 'empty',
+      endpointDirection: null,
       targetId: null,
     })),
   );
