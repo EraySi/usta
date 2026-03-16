@@ -1,3 +1,4 @@
+import type { LevelNeed } from './need';
 import type { Direction, PipeType } from './pipes';
 
 export type GridPosition = {
@@ -18,8 +19,6 @@ export type AvailablePiece = {
   count: number;
 };
 
-export type NeedId = string;
-
 export type LevelStarRules = {
   oneStar: number;
   twoStar: number;
@@ -35,6 +34,6 @@ export type LevelData = {
   targets: LevelTarget[];
   blockedCells: GridPosition[];
   availablePieces: AvailablePiece[];
-  needSequence: NeedId[];
+  needSequence: LevelNeed[];
   starRules: LevelStarRules;
 };

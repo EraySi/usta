@@ -25,7 +25,13 @@ export const WORLD_1_LEVELS: LevelData[] = [
       { type: 'corner', count: 3 },
       { type: 'tee', count: 1 },
     ],
-    needSequence: ['need-1'],
+    needSequence: [
+      {
+        id: 'need-1',
+        label: 'Need 1',
+        durationSeconds: 30,
+      },
+    ],
     starRules: {
       oneStar: 600,
       twoStar: 900,
@@ -59,7 +65,18 @@ export const WORLD_1_LEVELS: LevelData[] = [
       { type: 'corner', count: 5 },
       { type: 'tee', count: 1 },
     ],
-    needSequence: ['need-1', 'need-2'],
+    needSequence: [
+      {
+        id: 'need-1',
+        label: 'Need 1',
+        durationSeconds: 28,
+      },
+      {
+        id: 'need-2',
+        label: 'Need 2',
+        durationSeconds: 24,
+      },
+    ],
     starRules: {
       oneStar: 700,
       twoStar: 1000,
@@ -99,7 +116,23 @@ export const WORLD_1_LEVELS: LevelData[] = [
       { type: 'corner', count: 4 },
       { type: 'tee', count: 3 },
     ],
-    needSequence: ['need-1', 'need-2', 'need-3'],
+    needSequence: [
+      {
+        id: 'need-1',
+        label: 'Need 1',
+        durationSeconds: 26,
+      },
+      {
+        id: 'need-2',
+        label: 'Need 2',
+        durationSeconds: 22,
+      },
+      {
+        id: 'need-3',
+        label: 'Need 3',
+        durationSeconds: 18,
+      },
+    ],
     starRules: {
       oneStar: 800,
       twoStar: 1100,
