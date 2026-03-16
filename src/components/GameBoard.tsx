@@ -1,19 +1,24 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { BoardCellModel, GameBoardModel } from '../game/models/board';
 import { PipePreview } from './PipePreview';
 
 type GameBoardProps = {
   board: GameBoardModel;
+  onCellPress?: (cell: BoardCellModel) => void;
 };
 
-export function GameBoard({ board }: GameBoardProps) {
+export function GameBoard({ board, onCellPress }: GameBoardProps) {
   return (
     <View style={styles.board}>
       {board.map((row) => (
         <View key={row[0].id} style={styles.row}>
           {row.map((cell) => (
-            <BoardCell key={cell.id} cell={cell} />
+            <BoardCell
+              key={cell.id}
+              cell={cell}
+              onPress={onCellPress ? () => onCellPress(cell) : undefined}
+            />
           ))}
         </View>
       ))}
@@ -23,18 +28,24 @@ export function GameBoard({ board }: GameBoardProps) {
 
 type BoardCellProps = {
   cell: BoardCellModel;
+  onPress?: () => void;
 };
 
-function BoardCell({ cell }: BoardCellProps) {
+function BoardCell({ cell, onPress }: BoardCellProps) {
   const marker = getCellMarker(cell);
+  const isPressable = cell.cellType === 'empty' && !cell.pipe && Boolean(onPress);
 
   return (
-    <View
-      style={[
+    <Pressable
+      disabled={!isPressable}
+      onPress={onPress}
+      style={({ pressed }) => [
         styles.cell,
         cell.cellType === 'blocked' && styles.blockedCell,
         cell.cellType === 'source' && styles.sourceCell,
         cell.cellType === 'target' && styles.targetCell,
+        isPressable && styles.placeableCell,
+        pressed && isPressable && styles.pressedCell,
       ]}
     >
       {marker ? (
@@ -42,7 +53,7 @@ function BoardCell({ cell }: BoardCellProps) {
       ) : (
         <PipePreview pipe={cell.pipe} />
       )}
-    </View>
+    </Pressable>
   );
 }
 
@@ -80,6 +91,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#111111',
     backgroundColor: '#FFFFFF',
+  },
+  placeableCell: {
+    backgroundColor: '#FCFCFC',
+  },
+  pressedCell: {
+    backgroundColor: '#F3F4F6',
   },
   blockedCell: {
     backgroundColor: '#E5E7EB',

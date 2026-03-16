@@ -33,6 +33,19 @@ export type TeePipe = {
 
 export type PipeModel = StraightPipe | CornerPipe | TeePipe;
 
+export function createDefaultPipe(type: PipeType): PipeModel {
+  switch (type) {
+    case 'straight':
+      return { type: 'straight', orientation: 'horizontal' };
+    case 'corner':
+      return { type: 'corner', orientation: 'up-right' };
+    case 'tee':
+      return { type: 'tee', orientation: 'up-right-down' };
+    default:
+      return { type: 'straight', orientation: 'horizontal' };
+  }
+}
+
 const OPPOSITE_DIRECTIONS: Record<Direction, Direction> = {
   up: 'down',
   right: 'left',
