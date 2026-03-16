@@ -2,6 +2,7 @@ import type { BoardCellModel, GameBoardModel } from '../models/board';
 import type { AvailablePiece } from '../models/level';
 import {
   createDefaultPipe,
+  rotatePipe,
   type PipeType,
 } from '../models/pipes';
 
@@ -24,6 +25,10 @@ export function getFirstAvailablePipeType(
   availablePieces: AvailablePiece[],
 ): PipeType | null {
   return availablePieces.find((piece) => piece.count > 0)?.type ?? null;
+}
+
+export function canRotatePipeInCell(cell: BoardCellModel): boolean {
+  return cell.cellType === 'empty' && Boolean(cell.pipe);
 }
 
 export function placePipeOnBoard(
@@ -57,5 +62,27 @@ export function consumeAvailablePiece(
     piece.type === pipeType
       ? { ...piece, count: Math.max(piece.count - 1, 0) }
       : piece,
+  );
+}
+
+export function rotatePipeOnBoard(
+  board: GameBoardModel,
+  position: BoardPosition,
+): GameBoardModel {
+  return board.map((row) =>
+    row.map((cell) => {
+      if (cell.row !== position.row || cell.column !== position.column) {
+        return cell;
+      }
+
+      if (!canRotatePipeInCell(cell) || !cell.pipe) {
+        return cell;
+      }
+
+      return {
+        ...cell,
+        pipe: rotatePipe(cell.pipe),
+      };
+    }),
   );
 }
