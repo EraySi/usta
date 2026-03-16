@@ -4,7 +4,7 @@ export const WORLD_1_LEVELS: LevelData[] = [
   {
     id: 'w1-1',
     world: 1,
-    name: 'Open Yard',
+    name: 'Açık Avlu',
     gridSize: 6,
     source: {
       row: 0,
@@ -28,21 +28,21 @@ export const WORLD_1_LEVELS: LevelData[] = [
     needSequence: [
       {
         id: 'need-1',
-        label: 'Need 1',
+        label: 'İhtiyaç 1',
         targetId: 'target-1',
-        durationSeconds: 30,
+        durationSeconds: 90,
       },
     ],
     starRules: {
-      oneStar: 1,
-      twoStar: 10,
-      threeStar: 20,
+      oneStar: 15,
+      twoStar: 35,
+      threeStar: 55,
     },
   },
   {
     id: 'w1-2',
     world: 1,
-    name: 'Corner Turn',
+    name: 'Köşe Dönüşü',
     gridSize: 6,
     source: {
       row: 1,
@@ -69,27 +69,27 @@ export const WORLD_1_LEVELS: LevelData[] = [
     needSequence: [
       {
         id: 'need-1',
-        label: 'Need 1',
+        label: 'İhtiyaç 1',
         targetId: 'target-1',
-        durationSeconds: 28,
+        durationSeconds: 82,
       },
       {
         id: 'need-2',
-        label: 'Need 2',
+        label: 'İhtiyaç 2',
         targetId: 'target-1',
-        durationSeconds: 24,
+        durationSeconds: 68,
       },
     ],
     starRules: {
-      oneStar: 1,
-      twoStar: 9,
-      threeStar: 18,
+      oneStar: 14,
+      twoStar: 32,
+      threeStar: 50,
     },
   },
   {
     id: 'w1-3',
     world: 1,
-    name: 'Split Street',
+    name: 'Çatallı Sokak',
     gridSize: 6,
     source: {
       row: 2,
@@ -122,27 +122,27 @@ export const WORLD_1_LEVELS: LevelData[] = [
     needSequence: [
       {
         id: 'need-1',
-        label: 'Need 1',
+        label: 'İhtiyaç 1',
         targetId: 'target-1',
-        durationSeconds: 26,
+        durationSeconds: 95,
       },
       {
         id: 'need-2',
-        label: 'Need 2',
+        label: 'İhtiyaç 2',
         targetId: 'target-2',
-        durationSeconds: 22,
+        durationSeconds: 78,
       },
       {
         id: 'need-3',
-        label: 'Need 3',
+        label: 'İhtiyaç 3',
         targetId: 'target-1',
-        durationSeconds: 18,
+        durationSeconds: 64,
       },
     ],
     starRules: {
-      oneStar: 1,
-      twoStar: 8,
-      threeStar: 16,
+      oneStar: 16,
+      twoStar: 36,
+      threeStar: 56,
     },
   },
 ];

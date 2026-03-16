@@ -4,11 +4,11 @@ import type { ScreenProps } from './types';
 export function LoseScreen({ navigate }: ScreenProps) {
   return (
     <PlaceholderScreen
-      title="You Lose"
-      subtitle="This is the placeholder failure screen."
+      title="Bölüm Bitti"
+      subtitle="Süre doldu. Tekrar deneyebilirsin."
       actions={[
-        { label: 'Try Again', screen: 'game' },
-        { label: 'Back Home', screen: 'home' },
+        { label: 'Tekrar Dene', screen: 'game' },
+        { label: 'Ana Sayfa', screen: 'home' },
       ]}
       navigate={navigate}
     />

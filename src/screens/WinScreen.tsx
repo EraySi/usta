@@ -6,30 +6,29 @@ export function WinScreen({ navigate, result }: WinScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.content}>
-        <Text style={styles.title}>You Win</Text>
+        <Text style={styles.title}>Bölüm Tamamlandı</Text>
         <Text style={styles.subtitle}>
           {result
-            ? `${result.levelName} completed with ${result.stars}/3 stars.`
-            : 'Level completed.'}
+            ? `${result.levelName} bölümü ${result.stars}/3 yıldızla tamamlandı.`
+            : 'Bölüm tamamlandı.'}
         </Text>
 
         {result ? (
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Stars</Text>
+            <Text style={styles.summaryLabel}>Yıldız</Text>
             <Text style={styles.summaryValue}>{result.stars}/3</Text>
             <Text style={styles.summaryMeta}>
-              Time left: {formatCountdown(result.remainingSeconds)}
+              Kalan süre: {formatCountdown(result.remainingSeconds)}
             </Text>
-            <Text style={styles.summaryMeta}>Target: {result.targetId}</Text>
           </View>
         ) : null}
 
         <View style={styles.actions}>
           <Pressable onPress={() => navigate('game')} style={styles.button}>
-            <Text style={styles.buttonText}>Play Again</Text>
+            <Text style={styles.buttonText}>Tekrar Oyna</Text>
           </Pressable>
           <Pressable onPress={() => navigate('home')} style={styles.button}>
-            <Text style={styles.buttonText}>Back Home</Text>
+            <Text style={styles.buttonText}>Ana Sayfa</Text>
           </Pressable>
         </View>
       </View>
