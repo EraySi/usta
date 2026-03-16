@@ -48,7 +48,7 @@ export function PipeTray({
               ]}
             >
               <View style={styles.previewWrap}>
-                <PipePreview pipe={createDefaultPipe(piece.type)} />
+                <PipePreview pipe={createDefaultPipe(piece.type)} variant="tray" />
               </View>
               <Text style={styles.pieceName}>{piece.type}</Text>
               <Text style={styles.pieceCount}>x{piece.count}</Text>
@@ -67,12 +67,12 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     borderWidth: 1,
     borderBottomWidth: 0,
-    borderColor: '#CDAF7A',
-    backgroundColor: '#E8B769',
+    borderColor: '#A77435',
+    backgroundColor: '#D39245',
     paddingHorizontal: 18,
     paddingTop: 16,
     paddingBottom: 14,
-    shadowColor: '#93652D',
+    shadowColor: '#7A4D1D',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
@@ -86,19 +86,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    color: '#533618',
+    color: '#FFF4E0',
     fontSize: 17,
     fontWeight: '800',
     marginBottom: 4,
   },
   subtitle: {
-    color: '#734D28',
+    color: '#FBE1B8',
     fontSize: 13,
     lineHeight: 18,
   },
   selectionBadge: {
     borderRadius: 16,
-    backgroundColor: '#F6DCA9',
+    backgroundColor: '#F7E5BE',
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
@@ -118,21 +118,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 18,
     borderWidth: 2,
-    borderColor: '#D3AF71',
-    backgroundColor: '#FAE6BC',
+    borderColor: '#B77D35',
+    backgroundColor: '#F5D39B',
     paddingHorizontal: 8,
     paddingVertical: 12,
   },
   selectedPieceButton: {
     borderColor: '#173042',
-    backgroundColor: '#FFF8EA',
+    backgroundColor: '#FFF2D2',
   },
   disabledPieceButton: {
     opacity: 0.45,
   },
   previewWrap: {
-    width: 36,
-    height: 36,
+    width: 42,
+    height: 42,
     marginBottom: 8,
   },
   pieceName: {

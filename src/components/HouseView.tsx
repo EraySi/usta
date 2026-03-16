@@ -10,6 +10,7 @@ type HouseViewProps = {
   activeTargetId: string | null;
   countdownLabel: string;
   isExpired: boolean;
+  needProgress: number;
   targets: HouseTarget[];
 };
 
@@ -20,6 +21,7 @@ export function HouseView({
   activeTargetId,
   countdownLabel,
   isExpired,
+  needProgress,
   targets,
 }: HouseViewProps) {
   return (
@@ -29,15 +31,34 @@ export function HouseView({
       <View style={styles.cloudSmall} />
 
       <View style={styles.headerRow}>
-        <View style={styles.storyBubble}>
-          <Text style={styles.storyLabel}>House Call</Text>
-          <Text style={styles.storyText}>
-            Usta needs a clean water route to the right room.
-          </Text>
+        <View style={styles.requestBanner}>
+          <View style={styles.requestAvatar}>
+            <View style={styles.requestAvatarFace}>
+              <View style={styles.requestAvatarEye} />
+              <View style={styles.requestAvatarEye} />
+            </View>
+          </View>
+
+          <View style={styles.requestBody}>
+            <Text style={styles.storyLabel}>Customer Need</Text>
+            <Text style={styles.storyText}>{activeNeedLabel}</Text>
+
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${Math.max(0, Math.min(needProgress, 1)) * 100}%` },
+                ]}
+              />
+            </View>
+          </View>
         </View>
 
-        <View style={[styles.timerBubble, isExpired && styles.timerBubbleExpired]}>
-          <Text style={styles.timerLabel}>Rush</Text>
+        <View style={[styles.fixtureBanner, isExpired && styles.timerBubbleExpired]}>
+          <Text style={styles.timerLabel}>Fixture</Text>
+          <Text style={styles.fixtureValue}>
+            {formatTargetLabel(activeTargetId, targets)}
+          </Text>
           <Text style={styles.timerValue}>{countdownLabel}</Text>
         </View>
       </View>
@@ -188,12 +209,38 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 14,
   },
-  storyBubble: {
-    flex: 1,
+  requestBanner: {
+    flex: 1.2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     borderRadius: 18,
     backgroundColor: '#FFF8EA',
     paddingHorizontal: 14,
     paddingVertical: 12,
+  },
+  requestAvatar: {
+    width: 56,
+    alignItems: 'center',
+  },
+  requestAvatarFace: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F7D5A6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  requestAvatarEye: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#4A311F',
+  },
+  requestBody: {
+    flex: 1,
   },
   storyLabel: {
     color: '#9D7142',
@@ -208,8 +255,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     lineHeight: 20,
+    marginBottom: 8,
   },
-  timerBubble: {
+  progressTrack: {
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#E4D0A6',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 6,
+    backgroundColor: '#6FC05D',
+  },
+  fixtureBanner: {
     minWidth: 90,
     borderRadius: 20,
     backgroundColor: '#CC7652',
@@ -227,9 +286,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textTransform: 'uppercase',
   },
+  fixtureValue: {
+    color: '#FFF9EA',
+    fontSize: 16,
+    fontWeight: '800',
+    marginTop: 2,
+    textAlign: 'center',
+  },
   timerValue: {
     color: '#FFFFFF',
-    fontSize: 19,
+    fontSize: 16,
     fontWeight: '800',
     marginTop: 2,
     textAlign: 'center',

@@ -16,43 +16,52 @@ export function GameHud({
   isExpired,
 }: GameHudProps) {
   return (
-    <View style={styles.container}>
-      <View style={styles.stageChip}>
-        <Text style={styles.stageChipWorld}>Stage {world}</Text>
-        <Text style={styles.stageChipLevel}>{levelName}</Text>
-      </View>
+    <View style={styles.frame}>
+      <View style={styles.container}>
+        <View style={styles.stageChip}>
+          <Text style={styles.stageChipWorld}>Stage {world}</Text>
+          <Text style={styles.stageChipLevel}>{levelName}</Text>
+        </View>
 
-      <View style={styles.centerInfo}>
-        <Text style={styles.centerLabel}>Grid</Text>
-        <Text style={styles.centerValue}>{gridSize}x{gridSize}</Text>
-      </View>
+        <View style={styles.centerInfo}>
+          <Text style={styles.centerLabel}>Grid</Text>
+          <Text style={styles.centerValue}>{gridSize}x{gridSize}</Text>
+        </View>
 
-      <View style={[styles.timerChip, isExpired && styles.timerChipExpired]}>
-        <Text style={styles.timerChipLabel}>Order Rush</Text>
-        <Text style={styles.timerChipValue}>{countdownLabel}</Text>
+        <View style={[styles.timerChip, isExpired && styles.timerChipExpired]}>
+          <Text style={styles.timerChipLabel}>Order Rush</Text>
+          <Text style={styles.timerChipValue}>{countdownLabel}</Text>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  frame: {
+    width: '100%',
+    borderRadius: 22,
+    backgroundColor: '#925629',
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    marginBottom: 12,
+  },
   container: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
     gap: 10,
   },
   stageChip: {
     flex: 1.4,
-    borderRadius: 22,
-    backgroundColor: '#FFF2D2',
+    borderRadius: 18,
+    backgroundColor: '#7A451F',
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
   stageChipWorld: {
-    color: '#9A6C3D',
+    color: '#F7D594',
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.7,
@@ -60,19 +69,19 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   stageChipLevel: {
-    color: '#3E2D20',
+    color: '#FFF7E8',
     fontSize: 16,
     fontWeight: '800',
   },
   centerInfo: {
     minWidth: 72,
-    borderRadius: 22,
-    backgroundColor: '#E3D2AA',
+    borderRadius: 18,
+    backgroundColor: '#7A451F',
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
   centerLabel: {
-    color: '#7B6448',
+    color: '#EACB8C',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.6,
@@ -80,7 +89,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   centerValue: {
-    color: '#3F362C',
+    color: '#FFF4DF',
     fontSize: 18,
     fontWeight: '800',
     marginTop: 2,
@@ -88,8 +97,8 @@ const styles = StyleSheet.create({
   },
   timerChip: {
     minWidth: 98,
-    borderRadius: 22,
-    backgroundColor: '#CD7753',
+    borderRadius: 18,
+    backgroundColor: '#1F5F97',
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
@@ -97,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#A53A2F',
   },
   timerChipLabel: {
-    color: '#FFEAD5',
+    color: '#D3E8F8',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.7,

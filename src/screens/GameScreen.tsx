@@ -20,10 +20,12 @@ import type { PipeType } from '../game/models/pipes';
 import { loadLevel } from '../game/engine/levelLoader';
 import {
   canPlacePipeInCell,
+  canRotatePipeInCell,
   consumeAvailablePiece,
   getFirstAvailablePipeType,
   hasAvailablePiece,
   placePipeOnBoard,
+  rotatePipeOnBoard,
 } from '../game/engine/pipePlacement';
 import {
   createNeedTimerState,
@@ -31,6 +33,8 @@ import {
 } from '../game/engine/needTimer';
 import { createLevelWinResult } from '../game/engine/starScoring';
 import type { GameScreenProps } from './types';
+
+const FIXTURE_NAMES = ['Kitchen Sink', 'Bathroom Tub', 'Laundry Tap'];
 
 export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
   const loadedLevel = useMemo(() => {
@@ -109,6 +113,11 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
   }
 
   function handleBoardCellPress(cell: BoardCellModel) {
+    if (board && canRotatePipeInCell(cell)) {
+      setBoard(rotatePipeOnBoard(board, cell));
+      return;
+    }
+
     if (
       !board ||
       !canPlacePipeInCell(cell) ||
@@ -132,10 +141,7 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
     }
   }
 
-  const canPlaceSelectedPipe =
-    !needState?.isExpired &&
-    selectedPipeType !== null &&
-    hasAvailablePiece(availablePieces, selectedPipeType);
+  const canInteractWithBoard = !needState?.isExpired;
   const countdownLabel = formatCountdown(needState?.remainingSeconds ?? 0);
   const activeTargetId = needState?.activeNeed?.targetId ?? null;
   const houseTargets = loadedLevel.level.targets.map((target) => ({
@@ -146,7 +152,13 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
     (target) => target.id === activeTargetId,
   );
   const activeTargetLabel =
-    activeTargetIndex === -1 ? 'Waiting' : `Room ${activeTargetIndex + 1}`;
+    activeTargetIndex === -1
+      ? 'Waiting'
+      : FIXTURE_NAMES[activeTargetIndex] ?? `Room ${activeTargetIndex + 1}`;
+  const needProgress =
+    needState?.activeNeed?.durationSeconds
+      ? needState.remainingSeconds / needState.activeNeed.durationSeconds
+      : 0;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -168,6 +180,7 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
             activeTargetId={activeTargetId}
             countdownLabel={countdownLabel}
             isExpired={Boolean(needState?.isExpired)}
+            needProgress={needProgress}
             targets={houseTargets}
           />
 
@@ -193,13 +206,30 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
               <View style={styles.boardShadow} />
               <GameBoard
                 board={board}
-                onCellPress={canPlaceSelectedPipe ? handleBoardCellPress : undefined}
+                onCellPress={canInteractWithBoard ? handleBoardCellPress : undefined}
               />
             </View>
 
             <Text style={styles.helperText}>
-              Choose a pipe from the tray, then tap an open tile to place it.
+              Pick a pipe to place it. Tap a placed pipe again to rotate it.
             </Text>
+          </View>
+
+          <View style={styles.promptRow}>
+            <View style={styles.promptCharacter}>
+              <View style={styles.promptCap} />
+              <View style={styles.promptFace}>
+                <View style={styles.promptEye} />
+                <View style={styles.promptEye} />
+              </View>
+            </View>
+
+            <View style={styles.promptBubble}>
+              <Text style={styles.promptTitle}>Quick, connect the pipes.</Text>
+              <Text style={styles.promptText}>
+                Place pieces from the toolbox and rotate them until the water reaches the room.
+              </Text>
+            </View>
           </View>
         </ScrollView>
 
@@ -262,12 +292,12 @@ const styles = StyleSheet.create({
   boardSection: {
     width: '100%',
     borderRadius: 30,
-    backgroundColor: '#FCF5E6',
+    backgroundColor: '#E4BF84',
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 16,
     borderWidth: 1,
-    borderColor: '#E0C9A4',
+    borderColor: '#B88749',
   },
   boardHeader: {
     flexDirection: 'row',
@@ -336,10 +366,63 @@ const styles = StyleSheet.create({
     backgroundColor: '#D7C3A2',
   },
   helperText: {
-    color: '#6B6055',
+    color: '#5E4732',
     fontSize: 12,
     lineHeight: 18,
     textAlign: 'center',
+  },
+  promptRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
+    marginTop: 14,
+  },
+  promptCharacter: {
+    width: 78,
+    alignItems: 'center',
+  },
+  promptCap: {
+    width: 52,
+    height: 12,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    backgroundColor: '#2E78BE',
+    marginBottom: -2,
+    zIndex: 1,
+  },
+  promptFace: {
+    width: 64,
+    height: 70,
+    borderRadius: 32,
+    backgroundColor: '#F7D5A6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 10,
+  },
+  promptEye: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#4A311F',
+  },
+  promptBubble: {
+    flex: 1,
+    borderRadius: 22,
+    backgroundColor: '#FFF7E7',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  promptTitle: {
+    color: '#3F342A',
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  promptText: {
+    color: '#6B5B4A',
+    fontSize: 13,
+    lineHeight: 18,
   },
   button: {
     minHeight: 48,

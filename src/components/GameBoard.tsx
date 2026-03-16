@@ -33,7 +33,9 @@ type BoardCellProps = {
 
 function BoardCell({ cell, onPress }: BoardCellProps) {
   const marker = getCellMarker(cell);
-  const isPressable = cell.cellType === 'empty' && !cell.pipe && Boolean(onPress);
+  const canPlace = cell.cellType === 'empty' && !cell.pipe && Boolean(onPress);
+  const canRotate = cell.cellType === 'empty' && Boolean(cell.pipe) && Boolean(onPress);
+  const isPressable = canPlace || canRotate;
 
   return (
     <Pressable
@@ -44,14 +46,17 @@ function BoardCell({ cell, onPress }: BoardCellProps) {
         cell.cellType === 'blocked' && styles.blockedCell,
         cell.cellType === 'source' && styles.sourceCell,
         cell.cellType === 'target' && styles.targetCell,
-        isPressable && styles.placeableCell,
+        canPlace && styles.placeableCell,
+        canRotate && styles.rotatableCell,
         pressed && isPressable && styles.pressedCell,
       ]}
     >
       {marker ? (
-        <Text style={styles.markerText}>{marker}</Text>
+        <View style={[styles.markerBadge, cell.cellType === 'source' && styles.sourceMarkerBadge, cell.cellType === 'target' && styles.targetMarkerBadge]}>
+          <Text style={styles.markerText}>{marker}</Text>
+        </View>
       ) : (
-        <PipePreview pipe={cell.pipe} />
+        <PipePreview pipe={cell.pipe} variant="board" />
       )}
     </Pressable>
   );
@@ -60,11 +65,11 @@ function BoardCell({ cell, onPress }: BoardCellProps) {
 function getCellMarker(cell: BoardCellModel): string | null {
   switch (cell.cellType) {
     case 'blocked':
-      return 'X';
+      return null;
     case 'source':
-      return 'S';
+      return 'SU';
     case 'target':
-      return 'T';
+      return 'HEDEF';
     case 'empty':
     default:
       return null;
@@ -74,13 +79,13 @@ function getCellMarker(cell: BoardCellModel): string | null {
 const styles = StyleSheet.create({
   board: {
     width: '100%',
-    maxWidth: 360,
+    maxWidth: 364,
     aspectRatio: 1,
-    borderRadius: 28,
+    borderRadius: 26,
     overflow: 'hidden',
-    borderWidth: 4,
-    borderColor: '#35576B',
-    backgroundColor: '#E7D7BA',
+    borderWidth: 5,
+    borderColor: '#C8A26C',
+    backgroundColor: '#E5C997',
   },
   row: {
     flex: 1,
@@ -91,27 +96,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#CBB28D',
-    backgroundColor: '#FFFDF8',
+    borderColor: '#D5B584',
+    backgroundColor: '#F5E3BA',
   },
   placeableCell: {
-    backgroundColor: '#FFF7EA',
+    backgroundColor: '#F7E9C6',
+  },
+  rotatableCell: {
+    backgroundColor: '#F3DFB1',
   },
   pressedCell: {
-    backgroundColor: '#F2E0C5',
+    backgroundColor: '#E6C98E',
   },
   blockedCell: {
-    backgroundColor: '#C8B8A2',
+    backgroundColor: '#AE8F64',
   },
   sourceCell: {
-    backgroundColor: '#CFE6F2',
+    backgroundColor: '#D3E6F6',
   },
   targetCell: {
-    backgroundColor: '#D9F0DD',
+    backgroundColor: '#DFF1D9',
+  },
+  markerBadge: {
+    minWidth: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    backgroundColor: '#E9D9B6',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  sourceMarkerBadge: {
+    backgroundColor: '#2E77BF',
+  },
+  targetMarkerBadge: {
+    backgroundColor: '#3C423F',
   },
   markerText: {
-    color: '#173042',
-    fontSize: 15,
+    color: '#FFFFFF',
+    fontSize: 10,
     fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

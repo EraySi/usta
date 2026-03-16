@@ -46,6 +46,29 @@ export function createDefaultPipe(type: PipeType): PipeModel {
   }
 }
 
+export function rotatePipe(pipe: PipeModel): PipeModel {
+  switch (pipe.type) {
+    case 'straight':
+      return {
+        ...pipe,
+        orientation:
+          pipe.orientation === 'horizontal' ? 'vertical' : 'horizontal',
+      };
+    case 'corner':
+      return {
+        ...pipe,
+        orientation: getNextCornerOrientation(pipe.orientation),
+      };
+    case 'tee':
+      return {
+        ...pipe,
+        orientation: getNextTeeOrientation(pipe.orientation),
+      };
+    default:
+      return pipe;
+  }
+}
+
 const OPPOSITE_DIRECTIONS: Record<Direction, Direction> = {
   up: 'down',
   right: 'left',
@@ -86,5 +109,37 @@ export function getPipeConnections(pipe: PipeModel): readonly Direction[] {
       return TEE_CONNECTIONS[pipe.orientation];
     default:
       return [];
+  }
+}
+
+function getNextCornerOrientation(
+  orientation: CornerOrientation,
+): CornerOrientation {
+  switch (orientation) {
+    case 'up-right':
+      return 'right-down';
+    case 'right-down':
+      return 'down-left';
+    case 'down-left':
+      return 'left-up';
+    case 'left-up':
+    default:
+      return 'up-right';
+  }
+}
+
+function getNextTeeOrientation(
+  orientation: TeeOrientation,
+): TeeOrientation {
+  switch (orientation) {
+    case 'up-right-down':
+      return 'right-down-left';
+    case 'right-down-left':
+      return 'down-left-up';
+    case 'down-left-up':
+      return 'left-up-right';
+    case 'left-up-right':
+    default:
+      return 'up-right-down';
   }
 }
