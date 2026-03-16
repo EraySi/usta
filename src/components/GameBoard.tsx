@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import type { BoardCellModel, GameBoardModel } from '../game/models/board';
 import { PipePreview } from './PipePreview';
@@ -26,11 +26,38 @@ type BoardCellProps = {
 };
 
 function BoardCell({ cell }: BoardCellProps) {
+  const marker = getCellMarker(cell);
+
   return (
-    <View style={styles.cell}>
-      <PipePreview pipe={cell.pipe} />
+    <View
+      style={[
+        styles.cell,
+        cell.cellType === 'blocked' && styles.blockedCell,
+        cell.cellType === 'source' && styles.sourceCell,
+        cell.cellType === 'target' && styles.targetCell,
+      ]}
+    >
+      {marker ? (
+        <Text style={styles.markerText}>{marker}</Text>
+      ) : (
+        <PipePreview pipe={cell.pipe} />
+      )}
     </View>
   );
+}
+
+function getCellMarker(cell: BoardCellModel): string | null {
+  switch (cell.cellType) {
+    case 'blocked':
+      return 'X';
+    case 'source':
+      return 'S';
+    case 'target':
+      return 'T';
+    case 'empty':
+    default:
+      return null;
+  }
 }
 
 const styles = StyleSheet.create({
@@ -53,5 +80,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#111111',
     backgroundColor: '#FFFFFF',
+  },
+  blockedCell: {
+    backgroundColor: '#E5E7EB',
+  },
+  sourceCell: {
+    backgroundColor: '#DBEAFE',
+  },
+  targetCell: {
+    backgroundColor: '#DCFCE7',
+  },
+  markerText: {
+    color: '#111111',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
