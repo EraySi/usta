@@ -15,7 +15,11 @@ export function hasContinuousPipePath(
   const sourceCell = getBoardCell(board, source);
   const targetCell = getBoardCell(board, target);
 
-  if (!sourceCell?.pipe || !targetCell?.pipe) {
+  if (!sourceCell || !targetCell) {
+    return false;
+  }
+
+  if (!hasCellConnections(sourceCell) || !hasCellConnections(targetCell)) {
     return false;
   }
 
@@ -48,27 +52,41 @@ export function hasContinuousPipePath(
   return false;
 }
 
+export function hasPathFromSourceToTarget(
+  board: GameBoardModel,
+  targetId: string,
+): boolean {
+  const sourceCell = findSourceCell(board);
+  const targetCell = findTargetCell(board, targetId);
+
+  if (!sourceCell || !targetCell) {
+    return false;
+  }
+
+  return hasContinuousPipePath(board, sourceCell, targetCell);
+}
+
 export function getConnectedNeighborPositions(
   board: GameBoardModel,
   position: BoardPosition,
 ): BoardPosition[] {
   const cell = getBoardCell(board, position);
 
-  if (!cell?.pipe) {
+  if (!cell || !hasCellConnections(cell)) {
     return [];
   }
 
   const connectedNeighbors: BoardPosition[] = [];
 
-  for (const direction of getPipeConnections(cell.pipe)) {
+  for (const direction of getCellConnections(cell)) {
     const neighborPosition = movePosition(position, direction);
     const neighborCell = getBoardCell(board, neighborPosition);
 
-    if (!neighborCell?.pipe) {
+    if (!neighborCell || !hasCellConnections(neighborCell)) {
       continue;
     }
 
-    if (areAdjacentPipeCellsConnected(cell, neighborCell)) {
+    if (areAdjacentCellsConnected(cell, neighborCell)) {
       connectedNeighbors.push(neighborPosition);
     }
   }
@@ -76,11 +94,11 @@ export function getConnectedNeighborPositions(
   return connectedNeighbors;
 }
 
-export function areAdjacentPipeCellsConnected(
+export function areAdjacentCellsConnected(
   firstCell: BoardCellModel,
   secondCell: BoardCellModel,
 ): boolean {
-  if (!firstCell.pipe || !secondCell.pipe) {
+  if (!hasCellConnections(firstCell) || !hasCellConnections(secondCell)) {
     return false;
   }
 
@@ -90,13 +108,42 @@ export function areAdjacentPipeCellsConnected(
     return false;
   }
 
-  const firstConnections = getPipeConnections(firstCell.pipe);
-  const secondConnections = getPipeConnections(secondCell.pipe);
+  const firstConnections = getCellConnections(firstCell);
+  const secondConnections = getCellConnections(secondCell);
 
   return (
     firstConnections.includes(direction) &&
     secondConnections.includes(getOppositeDirection(direction))
   );
+}
+
+export function findSourceCell(board: GameBoardModel): BoardCellModel | null {
+  return findBoardCell(board, (cell) => cell.cellType === 'source');
+}
+
+export function findTargetCell(
+  board: GameBoardModel,
+  targetId: string,
+): BoardCellModel | null {
+  return findBoardCell(
+    board,
+    (cell) => cell.cellType === 'target' && cell.targetId === targetId,
+  );
+}
+
+export function getCellConnections(cell: BoardCellModel): readonly Direction[] {
+  if (cell.pipe) {
+    return getPipeConnections(cell.pipe);
+  }
+
+  if (
+    (cell.cellType === 'source' || cell.cellType === 'target') &&
+    cell.endpointDirection
+  ) {
+    return [cell.endpointDirection];
+  }
+
+  return [];
 }
 
 function getBoardCell(
@@ -108,6 +155,21 @@ function getBoardCell(
   }
 
   return board[position.row][position.column] ?? null;
+}
+
+function findBoardCell(
+  board: GameBoardModel,
+  predicate: (cell: BoardCellModel) => boolean,
+): BoardCellModel | null {
+  for (const row of board) {
+    for (const cell of row) {
+      if (predicate(cell)) {
+        return cell;
+      }
+    }
+  }
+
+  return null;
 }
 
 function isWithinBounds(
@@ -173,4 +235,8 @@ function isSamePosition(first: BoardPosition, second: BoardPosition): boolean {
 
 function toPositionKey(position: BoardPosition): string {
   return `${position.row}-${position.column}`;
+}
+
+function hasCellConnections(cell: BoardCellModel): boolean {
+  return getCellConnections(cell).length > 0;
 }
