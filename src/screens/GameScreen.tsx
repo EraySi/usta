@@ -1,14 +1,37 @@
+import { useEffect, useState } from 'react';
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 import { GameBoard } from '../components/GameBoard';
 import { WORLD_1_LEVELS } from '../game/data';
 import { loadLevel } from '../game/engine/levelLoader';
+import {
+  createNeedTimerState,
+  tickNeedTimerState,
+} from '../game/engine/needTimer';
 import type { ScreenProps } from './types';
 
 const selectedLevel = WORLD_1_LEVELS[0];
 const loadedLevel = selectedLevel ? loadLevel(selectedLevel.id) : null;
 
 export function GameScreen({ navigate }: ScreenProps) {
+  const [needState, setNeedState] = useState(() =>
+    loadedLevel ? createNeedTimerState(loadedLevel.level) : null,
+  );
+
+  useEffect(() => {
+    if (!needState?.activeNeed || needState.isExpired) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setNeedState((currentState) =>
+        currentState ? tickNeedTimerState(currentState) : currentState,
+      );
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [needState]);
+
   if (!loadedLevel) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -35,6 +58,21 @@ export function GameScreen({ navigate }: ScreenProps) {
           {loadedLevel.level.gridSize} board loaded from local level data.
         </Text>
 
+        <View style={styles.needCard}>
+          <Text style={styles.needLabel}>Active Need</Text>
+          <Text style={styles.needTitle}>
+            {needState?.activeNeed?.label ?? 'No active need'}
+          </Text>
+          <Text
+            style={[
+              styles.countdown,
+              needState?.isExpired && styles.countdownExpired,
+            ]}
+          >
+            {formatCountdown(needState?.remainingSeconds ?? 0)}
+          </Text>
+        </View>
+
         <GameBoard board={loadedLevel.board} />
 
         <View style={styles.actions}>
@@ -48,6 +86,14 @@ export function GameScreen({ navigate }: ScreenProps) {
       </View>
     </SafeAreaView>
   );
+}
+
+function formatCountdown(totalSeconds: number): string {
+  const safeSeconds = Math.max(totalSeconds, 0);
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 const styles = StyleSheet.create({
@@ -73,8 +119,40 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontSize: 16,
     lineHeight: 22,
-    marginBottom: 24,
+    marginBottom: 16,
     textAlign: 'center',
+  },
+  needCard: {
+    width: '100%',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#111111',
+    backgroundColor: '#F7F7F7',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 20,
+  },
+  needLabel: {
+    color: '#666666',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  needTitle: {
+    color: '#111111',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  countdown: {
+    color: '#0F766E',
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  countdownExpired: {
+    color: '#B91C1C',
   },
   actions: {
     width: '100%',
