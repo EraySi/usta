@@ -11,20 +11,23 @@ import {
 import { GameBoard } from '../components/GameBoard';
 import { GameHud } from '../components/GameHud';
 import { HouseView } from '../components/HouseView';
+import { PlumberPopup } from '../components/PlumberPopup';
 import { PipeTray } from '../components/PipeTray';
 import type { BoardCellModel, GameBoardModel } from '../game/models/board';
 import { getGameOutcome } from '../game/engine/gameOutcome';
-import type { AvailablePiece } from '../game/models/level';
 import type { NeedTimerState } from '../game/models/need';
 import type { PipeType } from '../game/models/pipes';
 import { loadLevel } from '../game/engine/levelLoader';
 import {
   canPlacePipeInCell,
+  canMovePipeToCell,
   canRotatePipeInCell,
-  consumeAvailablePiece,
+  getAvailablePiecesForBoard,
   getFirstAvailablePipeType,
   hasAvailablePiece,
+  movePipeOnBoard,
   placePipeOnBoard,
+  removePipeFromBoard,
   rotatePipeOnBoard,
 } from '../game/engine/pipePlacement';
 import {
@@ -34,33 +37,45 @@ import {
 import { createLevelWinResult } from '../game/engine/starScoring';
 import type { GameScreenProps } from './types';
 
-const FIXTURE_NAMES = ['Kitchen Sink', 'Bathroom Tub', 'Laundry Tap'];
+const FIXTURE_NAMES = ['Mutfak Lavabosu', 'Banyo Lavabosu', 'Çamaşır Musluğu'];
+const TARGET_BADGE_COLORS = ['#2B73B5', '#C97831', '#3F4347'];
 
 export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
   const loadedLevel = useMemo(() => {
     return levelId ? loadLevel(levelId) : null;
   }, [levelId]);
   const [board, setBoard] = useState<GameBoardModel | null>(null);
-  const [availablePieces, setAvailablePieces] = useState<AvailablePiece[]>([]);
   const [selectedPipeType, setSelectedPipeType] = useState<PipeType | null>(null);
   const [needState, setNeedState] = useState<NeedTimerState | null>(null);
+
+  const availablePieces = useMemo(() => {
+    if (!loadedLevel) {
+      return [];
+    }
+
+    return getAvailablePiecesForBoard(loadedLevel.level.availablePieces, board);
+  }, [board, loadedLevel]);
 
   useEffect(() => {
     if (!loadedLevel) {
       setBoard(null);
-      setAvailablePieces([]);
       setSelectedPipeType(null);
       setNeedState(null);
       return;
     }
 
     setBoard(loadedLevel.board);
-    setAvailablePieces(loadedLevel.level.availablePieces.map((piece) => ({ ...piece })));
     setSelectedPipeType(
       getFirstAvailablePipeType(loadedLevel.level.availablePieces),
     );
     setNeedState(createNeedTimerState(loadedLevel.level));
   }, [loadedLevel]);
+
+  useEffect(() => {
+    if (selectedPipeType && !hasAvailablePiece(availablePieces, selectedPipeType)) {
+      setSelectedPipeType(getFirstAvailablePipeType(availablePieces));
+    }
+  }, [availablePieces, selectedPipeType]);
 
   useEffect(() => {
     if (!needState?.activeNeed || needState.isExpired) {
@@ -99,12 +114,12 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
-          <Text style={styles.title}>Game</Text>
-          <Text style={styles.subtitle}>No local sample level is available.</Text>
+          <Text style={styles.title}>Oyun</Text>
+          <Text style={styles.subtitle}>Yerel örnek bölüm bulunamadı.</Text>
 
           <View style={styles.actions}>
             <Pressable onPress={() => navigate('home')} style={styles.button}>
-              <Text style={styles.buttonText}>Back Home</Text>
+              <Text style={styles.buttonText}>Ana Sayfa</Text>
             </Pressable>
           </View>
         </View>
@@ -128,17 +143,45 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
     }
 
     const nextBoard = placePipeOnBoard(board, cell, selectedPipeType);
-    const nextAvailablePieces = consumeAvailablePiece(
-      availablePieces,
-      selectedPipeType,
-    );
+    const nextAvailablePieces = loadedLevel
+      ? getAvailablePiecesForBoard(loadedLevel.level.availablePieces, nextBoard)
+      : availablePieces;
 
     setBoard(nextBoard);
-    setAvailablePieces(nextAvailablePieces);
 
     if (!hasAvailablePiece(nextAvailablePieces, selectedPipeType)) {
       setSelectedPipeType(getFirstAvailablePipeType(nextAvailablePieces));
     }
+  }
+
+  function handleMovePipe(
+    fromCell: BoardCellModel,
+    toCell: BoardCellModel | null,
+  ) {
+    if (!board || !fromCell.pipe) {
+      return;
+    }
+
+    if (!toCell) {
+      const nextBoard = removePipeFromBoard(board, fromCell);
+      const nextAvailablePieces = loadedLevel
+        ? getAvailablePiecesForBoard(loadedLevel.level.availablePieces, nextBoard)
+        : availablePieces;
+
+      setBoard(nextBoard);
+
+      if (!selectedPipeType) {
+        setSelectedPipeType(getFirstAvailablePipeType(nextAvailablePieces));
+      }
+
+      return;
+    }
+
+    if (!canMovePipeToCell(toCell)) {
+      return;
+    }
+
+    setBoard(movePipeOnBoard(board, fromCell, toCell));
   }
 
   const canInteractWithBoard = !needState?.isExpired;
@@ -153,8 +196,12 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
   );
   const activeTargetLabel =
     activeTargetIndex === -1
-      ? 'Waiting'
-      : FIXTURE_NAMES[activeTargetIndex] ?? `Room ${activeTargetIndex + 1}`;
+      ? 'Bekleniyor'
+      : FIXTURE_NAMES[activeTargetIndex] ?? `Oda ${activeTargetIndex + 1}`;
+  const activeTargetBadgeColor =
+    activeTargetIndex === -1
+      ? '#3F4347'
+      : TARGET_BADGE_COLORS[activeTargetIndex] ?? '#3F4347';
   const needProgress =
     needState?.activeNeed?.durationSeconds
       ? needState.remainingSeconds / needState.activeNeed.durationSeconds
@@ -176,7 +223,7 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
           />
 
           <HouseView
-            activeNeedLabel={needState?.activeNeed?.label ?? 'No active need'}
+            activeNeedLabel={needState?.activeNeed?.label ?? 'Aktif ihtiyaç yok'}
             activeTargetId={activeTargetId}
             countdownLabel={countdownLabel}
             isExpired={Boolean(needState?.isExpired)}
@@ -184,54 +231,52 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
             targets={houseTargets}
           />
 
-          <View style={styles.boardSection}>
-            <View style={styles.boardHeader}>
-              <View style={styles.boardHeadingText}>
-                <Text style={styles.boardLabel}>Pipe Yard</Text>
-                <Text style={styles.boardTitle}>Build the route</Text>
-                <Text style={styles.boardSubtitle}>
-                  Lay pieces on the board and send water into the highlighted fixture.
-                </Text>
-              </View>
-
-              <View style={styles.boardTargetBadge}>
-                <Text style={styles.boardTargetBadgeLabel}>Deliver To</Text>
+          <View style={styles.playfieldSection}>
+            <View style={styles.playfieldHeader}>
+              <Text style={styles.boardLabel}>Boru Alanı</Text>
+              <View
+                style={[
+                  styles.boardTargetBadge,
+                  { backgroundColor: activeTargetBadgeColor },
+                ]}
+              >
+                <Text style={styles.boardTargetBadgeLabel}>Hedef</Text>
                 <Text style={styles.boardTargetBadgeValue}>
                   {activeTargetLabel}
                 </Text>
               </View>
             </View>
 
-            <View style={styles.boardFrame}>
-              <View style={styles.boardShadow} />
-              <GameBoard
-                board={board}
-                onCellPress={canInteractWithBoard ? handleBoardCellPress : undefined}
-              />
-            </View>
+            <View style={styles.groundArea}>
+              <View style={styles.groundStoneOne} />
+              <View style={styles.groundStoneTwo} />
+              <View style={styles.groundStoneThree} />
 
-            <Text style={styles.helperText}>
-              Pick a pipe to place it. Tap a placed pipe again to rotate it.
-            </Text>
-          </View>
-
-          <View style={styles.promptRow}>
-            <View style={styles.promptCharacter}>
-              <View style={styles.promptCap} />
-              <View style={styles.promptFace}>
-                <View style={styles.promptEye} />
-                <View style={styles.promptEye} />
+              <View style={styles.boardFrame}>
+                <View style={styles.boardShadow} />
+                <View style={styles.boardPlate}>
+                  <GameBoard
+                    board={board}
+                    onMovePipe={canInteractWithBoard ? handleMovePipe : undefined}
+                    onCellPress={canInteractWithBoard ? handleBoardCellPress : undefined}
+                  />
+                </View>
               </View>
-            </View>
 
-            <View style={styles.promptBubble}>
-              <Text style={styles.promptTitle}>Quick, connect the pipes.</Text>
-              <Text style={styles.promptText}>
-                Place pieces from the toolbox and rotate them until the water reaches the room.
-              </Text>
+              <View style={styles.boardHintBubble}>
+                <Text style={styles.helperText}>
+                  Bir boru seç, tahtaya yerleştir. Yanlış koyduysan sürükleyip başka hücreye taşı ya da tahtanın dışına bırakıp geri al.
+                </Text>
+              </View>
             </View>
           </View>
         </ScrollView>
+
+        <PlumberPopup
+          message={`${activeTargetLabel} için suyu bağla. Yerleştirdiğin boruya dokunarak döndür, istersen sürükleyip başka hücreye taşı ya da alanın dışına bırakıp geri al.`}
+          popupKey={`${levelId ?? 'no-level'}-${needState?.activeNeed?.id ?? 'no-need'}`}
+          title={needState?.activeNeed?.label ?? 'İhtiyaç'}
+        />
 
         <PipeTray
           availablePieces={availablePieces}
@@ -269,7 +314,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 16,
+    paddingBottom: 300,
   },
   title: {
     color: '#173042',
@@ -289,55 +334,31 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 24,
   },
-  boardSection: {
+  playfieldSection: {
     width: '100%',
-    borderRadius: 30,
-    backgroundColor: '#E4BF84',
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 16,
-    borderWidth: 1,
-    borderColor: '#B88749',
+    marginTop: 2,
   },
-  boardHeader: {
+  playfieldHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 12,
-    marginBottom: 16,
-  },
-  boardHeadingText: {
-    flex: 1,
+    marginBottom: 10,
   },
   boardLabel: {
-    color: '#9A6D3E',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  boardTitle: {
-    color: '#243A42',
-    fontSize: 23,
+    color: '#9D7142',
+    fontSize: 12,
     fontWeight: '800',
-    marginBottom: 4,
-  },
-  boardSubtitle: {
-    color: '#6B6055',
-    fontSize: 13,
-    lineHeight: 18,
-    maxWidth: 210,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   boardTargetBadge: {
-    minWidth: 96,
-    borderRadius: 20,
-    backgroundColor: '#E7F2E5',
-    paddingHorizontal: 12,
+    borderRadius: 18,
+    paddingHorizontal: 14,
     paddingVertical: 10,
   },
   boardTargetBadgeLabel: {
-    color: '#2F7253',
+    color: '#F4F6F7',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.7,
@@ -345,84 +366,79 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   boardTargetBadgeValue: {
-    color: '#174C37',
-    fontSize: 14,
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '800',
-    marginTop: 4,
+    marginTop: 3,
     textAlign: 'center',
+  },
+  groundArea: {
+    borderRadius: 34,
+    backgroundColor: '#8D5D2E',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    overflow: 'hidden',
+  },
+  groundStoneOne: {
+    position: 'absolute',
+    left: 14,
+    top: 58,
+    width: 36,
+    height: 18,
+    borderRadius: 10,
+    backgroundColor: '#B88D58',
+  },
+  groundStoneTwo: {
+    position: 'absolute',
+    right: 30,
+    top: 110,
+    width: 28,
+    height: 14,
+    borderRadius: 8,
+    backgroundColor: '#A97D48',
+  },
+  groundStoneThree: {
+    position: 'absolute',
+    right: 54,
+    bottom: 64,
+    width: 18,
+    height: 10,
+    borderRadius: 6,
+    backgroundColor: '#C39C66',
   },
   boardFrame: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 8,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   boardShadow: {
     position: 'absolute',
-    top: 22,
-    width: '86%',
-    height: '88%',
-    borderRadius: 28,
-    backgroundColor: '#D7C3A2',
+    top: 12,
+    width: '88%',
+    height: '90%',
+    borderRadius: 34,
+    backgroundColor: '#6B451F',
+  },
+  boardPlate: {
+    width: '100%',
+    borderRadius: 30,
+    backgroundColor: '#F7E9C8',
+    padding: 12,
+    borderWidth: 3,
+    borderColor: '#DDBA84',
+  },
+  boardHintBubble: {
+    borderRadius: 24,
+    backgroundColor: '#F8EFD9',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   helperText: {
-    color: '#5E4732',
-    fontSize: 12,
-    lineHeight: 18,
-    textAlign: 'center',
-  },
-  promptRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 12,
-    marginTop: 14,
-  },
-  promptCharacter: {
-    width: 78,
-    alignItems: 'center',
-  },
-  promptCap: {
-    width: 52,
-    height: 12,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    backgroundColor: '#2E78BE',
-    marginBottom: -2,
-    zIndex: 1,
-  },
-  promptFace: {
-    width: 64,
-    height: 70,
-    borderRadius: 32,
-    backgroundColor: '#F7D5A6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 10,
-  },
-  promptEye: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#4A311F',
-  },
-  promptBubble: {
-    flex: 1,
-    borderRadius: 22,
-    backgroundColor: '#FFF7E7',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  promptTitle: {
-    color: '#3F342A',
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  promptText: {
-    color: '#6B5B4A',
+    color: '#62492F',
     fontSize: 13,
     lineHeight: 18,
+    textAlign: 'center',
   },
   button: {
     minHeight: 48,

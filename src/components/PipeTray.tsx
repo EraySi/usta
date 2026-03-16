@@ -17,14 +17,16 @@ export function PipeTray({
 }: PipeTrayProps) {
   return (
     <View style={styles.container}>
+      <View style={styles.trayLip} />
+
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Toolbox</Text>
-          <Text style={styles.subtitle}>Pick a pipe piece and drop it onto the board.</Text>
+          <Text style={styles.title}>Alet Kutusu</Text>
+          <Text style={styles.subtitle}>Bir boru seç, sonra tahtaya yerleştir.</Text>
         </View>
         <View style={styles.selectionBadge}>
           <Text style={styles.selectionLabel}>
-            {selectedPipeType ? 'Ready' : 'Choose'}
+            {selectedPipeType ? 'Hazır' : 'Seç'}
           </Text>
         </View>
       </View>
@@ -47,10 +49,11 @@ export function PipeTray({
                 isDisabled && styles.disabledPieceButton,
               ]}
             >
-              <View style={styles.previewWrap}>
+              <View style={styles.previewStage}>
+                <View style={styles.previewGlow} />
                 <PipePreview pipe={createDefaultPipe(piece.type)} variant="tray" />
               </View>
-              <Text style={styles.pieceName}>{piece.type}</Text>
+              <Text style={styles.pieceName}>{getPipeLabel(piece.type)}</Text>
               <Text style={styles.pieceCount}>x{piece.count}</Text>
             </Pressable>
           );
@@ -63,20 +66,29 @@ export function PipeTray({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderWidth: 1,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    borderWidth: 2,
     borderBottomWidth: 0,
-    borderColor: '#A77435',
-    backgroundColor: '#D39245',
+    borderColor: '#A56E2F',
+    backgroundColor: '#D99845',
     paddingHorizontal: 18,
-    paddingTop: 16,
+    paddingTop: 22,
     paddingBottom: 14,
     shadowColor: '#7A4D1D',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 8,
+  },
+  trayLip: {
+    position: 'absolute',
+    top: 8,
+    alignSelf: 'center',
+    width: 72,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#F2CA88',
   },
   header: {
     flexDirection: 'row',
@@ -97,8 +109,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   selectionBadge: {
-    borderRadius: 16,
-    backgroundColor: '#F7E5BE',
+    borderRadius: 18,
+    backgroundColor: '#F9E7C1',
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
@@ -111,17 +123,17 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 12,
   },
   pieceButton: {
     flex: 1,
     alignItems: 'center',
-    borderRadius: 18,
+    borderRadius: 22,
     borderWidth: 2,
-    borderColor: '#B77D35',
-    backgroundColor: '#F5D39B',
+    borderColor: '#BE8740',
+    backgroundColor: '#F2CF91',
     paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingVertical: 16,
   },
   selectedPieceButton: {
     borderColor: '#173042',
@@ -130,14 +142,23 @@ const styles = StyleSheet.create({
   disabledPieceButton: {
     opacity: 0.45,
   },
-  previewWrap: {
-    width: 42,
+  previewStage: {
+    width: 74,
+    height: 66,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  previewGlow: {
+    position: 'absolute',
+    width: 64,
     height: 42,
-    marginBottom: 8,
+    borderRadius: 22,
+    backgroundColor: '#F8E8C6',
   },
   pieceName: {
     color: '#5B4126',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     textTransform: 'capitalize',
     marginBottom: 4,
@@ -148,3 +169,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+
+function getPipeLabel(pipeType: PipeType): string {
+  switch (pipeType) {
+    case 'straight':
+      return 'Düz';
+    case 'corner':
+      return 'Dirsek';
+    case 'tee':
+      return 'T Boru';
+    default:
+      return pipeType;
+  }
+}

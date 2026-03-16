@@ -31,6 +31,14 @@ export function canRotatePipeInCell(cell: BoardCellModel): boolean {
   return cell.cellType === 'empty' && Boolean(cell.pipe);
 }
 
+export function canMovePipeFromCell(cell: BoardCellModel): boolean {
+  return cell.cellType === 'empty' && Boolean(cell.pipe);
+}
+
+export function canMovePipeToCell(cell: BoardCellModel): boolean {
+  return canPlacePipeInCell(cell);
+}
+
 export function placePipeOnBoard(
   board: GameBoardModel,
   position: BoardPosition,
@@ -85,4 +93,104 @@ export function rotatePipeOnBoard(
       };
     }),
   );
+}
+
+export function movePipeOnBoard(
+  board: GameBoardModel,
+  from: BoardPosition,
+  to: BoardPosition,
+): GameBoardModel {
+  const fromCell = board[from.row]?.[from.column];
+  const toCell = board[to.row]?.[to.column];
+
+  if (!fromCell?.pipe || !canMovePipeFromCell(fromCell) || !toCell || !canMovePipeToCell(toCell)) {
+    return board;
+  }
+
+  if (from.row === to.row && from.column === to.column) {
+    return board;
+  }
+
+  const movingPipe = fromCell.pipe;
+
+  return board.map((row) =>
+    row.map((cell) => {
+      if (cell.row === from.row && cell.column === from.column) {
+        return {
+          ...cell,
+          pipe: null,
+        };
+      }
+
+      if (cell.row === to.row && cell.column === to.column) {
+        return {
+          ...cell,
+          pipe: movingPipe,
+        };
+      }
+
+      return cell;
+    }),
+  );
+}
+
+export function removePipeFromBoard(
+  board: GameBoardModel,
+  position: BoardPosition,
+): GameBoardModel {
+  return board.map((row) =>
+    row.map((cell) => {
+      if (cell.row !== position.row || cell.column !== position.column) {
+        return cell;
+      }
+
+      if (!cell.pipe || !canMovePipeFromCell(cell)) {
+        return cell;
+      }
+
+      return {
+        ...cell,
+        pipe: null,
+      };
+    }),
+  );
+}
+
+export function restoreAvailablePiece(
+  availablePieces: AvailablePiece[],
+  pipeType: PipeType,
+): AvailablePiece[] {
+  return availablePieces.map((piece) =>
+    piece.type === pipeType
+      ? { ...piece, count: piece.count + 1 }
+      : piece,
+  );
+}
+
+export function getAvailablePiecesForBoard(
+  baseAvailablePieces: AvailablePiece[],
+  board: GameBoardModel | null,
+): AvailablePiece[] {
+  if (!board) {
+    return baseAvailablePieces.map((piece) => ({ ...piece }));
+  }
+
+  const placedCounts: Record<PipeType, number> = {
+    straight: 0,
+    corner: 0,
+    tee: 0,
+  };
+
+  for (const row of board) {
+    for (const cell of row) {
+      if (cell.pipe) {
+        placedCounts[cell.pipe.type] += 1;
+      }
+    }
+  }
+
+  return baseAvailablePieces.map((piece) => ({
+    ...piece,
+    count: Math.max(piece.count - placedCounts[piece.type], 0),
+  }));
 }

@@ -19,17 +19,17 @@ export function GameHud({
     <View style={styles.frame}>
       <View style={styles.container}>
         <View style={styles.stageChip}>
-          <Text style={styles.stageChipWorld}>Stage {world}</Text>
+          <Text style={styles.stageChipWorld}>BÖLÜM {world}</Text>
           <Text style={styles.stageChipLevel}>{levelName}</Text>
         </View>
 
         <View style={styles.centerInfo}>
-          <Text style={styles.centerLabel}>Grid</Text>
+          <Text style={styles.centerLabel}>IZGARA</Text>
           <Text style={styles.centerValue}>{gridSize}x{gridSize}</Text>
         </View>
 
         <View style={[styles.timerChip, isExpired && styles.timerChipExpired]}>
-          <Text style={styles.timerChipLabel}>Order Rush</Text>
+          <Text style={styles.timerChipLabel}>SÜRE</Text>
           <Text style={styles.timerChipValue}>{countdownLabel}</Text>
         </View>
       </View>

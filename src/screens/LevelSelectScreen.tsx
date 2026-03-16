@@ -11,8 +11,8 @@ export function LevelSelectScreen({
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.content}>
-        <Text style={styles.title}>Level Select</Text>
-        <Text style={styles.subtitle}>Choose a World 1 sample level.</Text>
+        <Text style={styles.title}>Bölüm Seç</Text>
+        <Text style={styles.subtitle}>1. dünya bölümlerinden birini seç.</Text>
 
         <View style={styles.levelList}>
           {WORLD_1_LEVELS.map((level) => {
@@ -40,7 +40,7 @@ export function LevelSelectScreen({
         </View>
 
         <Pressable onPress={() => navigate('home')} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Back Home</Text>
+          <Text style={styles.backButtonText}>Ana Sayfa</Text>
         </Pressable>
       </View>
     </SafeAreaView>
