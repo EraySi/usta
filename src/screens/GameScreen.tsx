@@ -1,21 +1,41 @@
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 import { GameBoard } from '../components/GameBoard';
-import { createInitialBoard } from '../game/models/board';
+import { WORLD_1_LEVELS } from '../game/data';
+import { loadLevel } from '../game/engine/levelLoader';
 import type { ScreenProps } from './types';
 
-const board = createInitialBoard();
+const selectedLevel = WORLD_1_LEVELS[0];
+const loadedLevel = selectedLevel ? loadLevel(selectedLevel.id) : null;
 
 export function GameScreen({ navigate }: ScreenProps) {
+  if (!loadedLevel) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Game</Text>
+          <Text style={styles.subtitle}>No local sample level is available.</Text>
+
+          <View style={styles.actions}>
+            <Pressable onPress={() => navigate('home')} style={styles.button}>
+              <Text style={styles.buttonText}>Back Home</Text>
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.content}>
-        <Text style={styles.title}>Game</Text>
+        <Text style={styles.title}>{loadedLevel.level.name}</Text>
         <Text style={styles.subtitle}>
-          A 6x6 placeholder board is ready for future pipe placement.
+          World {loadedLevel.level.world} · {loadedLevel.level.gridSize}x
+          {loadedLevel.level.gridSize} board loaded from local level data.
         </Text>
 
-        <GameBoard board={board} />
+        <GameBoard board={loadedLevel.board} />
 
         <View style={styles.actions}>
           <Pressable onPress={() => navigate('win')} style={styles.button}>
