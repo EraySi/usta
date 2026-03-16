@@ -20,9 +20,10 @@ import {
   createNeedTimerState,
   tickNeedTimerState,
 } from '../game/engine/needTimer';
+import { createLevelWinResult } from '../game/engine/starScoring';
 import type { GameScreenProps } from './types';
 
-export function GameScreen({ navigate, levelId }: GameScreenProps) {
+export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
   const loadedLevel = useMemo(() => {
     return levelId ? loadLevel(levelId) : null;
   }, [levelId]);
@@ -65,10 +66,21 @@ export function GameScreen({ navigate, levelId }: GameScreenProps) {
   useEffect(() => {
     const outcome = getGameOutcome(board, needState);
 
-    if (outcome) {
-      navigate(outcome);
+    if (outcome === 'win' && loadedLevel && needState) {
+      const winResult = createLevelWinResult(loadedLevel.level, needState);
+
+      if (winResult) {
+        onWinLevel(winResult);
+      }
+
+      navigate('win');
+      return;
     }
-  }, [board, navigate, needState]);
+
+    if (outcome === 'lose') {
+      navigate('lose');
+    }
+  }, [board, loadedLevel, navigate, needState, onWinLevel]);
 
   if (!loadedLevel || !board) {
     return (

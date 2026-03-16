@@ -34,9 +34,9 @@ export const WORLD_1_LEVELS: LevelData[] = [
       },
     ],
     starRules: {
-      oneStar: 600,
-      twoStar: 900,
-      threeStar: 1200,
+      oneStar: 1,
+      twoStar: 10,
+      threeStar: 20,
     },
   },
   {
@@ -81,9 +81,9 @@ export const WORLD_1_LEVELS: LevelData[] = [
       },
     ],
     starRules: {
-      oneStar: 700,
-      twoStar: 1000,
-      threeStar: 1300,
+      oneStar: 1,
+      twoStar: 9,
+      threeStar: 18,
     },
   },
   {
@@ -140,9 +140,9 @@ export const WORLD_1_LEVELS: LevelData[] = [
       },
     ],
     starRules: {
-      oneStar: 800,
-      twoStar: 1100,
-      threeStar: 1400,
+      oneStar: 1,
+      twoStar: 8,
+      threeStar: 16,
     },
   },
 ];
