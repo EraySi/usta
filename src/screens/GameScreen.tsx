@@ -9,6 +9,7 @@ import type { NeedTimerState } from '../game/models/need';
 import type { PipeType } from '../game/models/pipes';
 import { loadLevel } from '../game/engine/levelLoader';
 import {
+  canPlacePipeInCell,
   consumeAvailablePiece,
   getFirstAvailablePipeType,
   hasAvailablePiece,
@@ -80,6 +81,7 @@ export function GameScreen({ navigate, levelId }: GameScreenProps) {
   function handleBoardCellPress(cell: BoardCellModel) {
     if (
       !board ||
+      !canPlacePipeInCell(cell) ||
       !selectedPipeType ||
       !hasAvailablePiece(availablePieces, selectedPipeType)
     ) {
