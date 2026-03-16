@@ -1,6 +1,7 @@
 export type LevelNeed = {
   id: string;
   label: string;
+  targetId: string;
   durationSeconds: number;
 };
 

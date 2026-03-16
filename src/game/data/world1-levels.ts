@@ -29,6 +29,7 @@ export const WORLD_1_LEVELS: LevelData[] = [
       {
         id: 'need-1',
         label: 'Need 1',
+        targetId: 'target-1',
         durationSeconds: 30,
       },
     ],
@@ -69,11 +70,13 @@ export const WORLD_1_LEVELS: LevelData[] = [
       {
         id: 'need-1',
         label: 'Need 1',
+        targetId: 'target-1',
         durationSeconds: 28,
       },
       {
         id: 'need-2',
         label: 'Need 2',
+        targetId: 'target-1',
         durationSeconds: 24,
       },
     ],
@@ -120,16 +123,19 @@ export const WORLD_1_LEVELS: LevelData[] = [
       {
         id: 'need-1',
         label: 'Need 1',
+        targetId: 'target-1',
         durationSeconds: 26,
       },
       {
         id: 'need-2',
         label: 'Need 2',
+        targetId: 'target-2',
         durationSeconds: 22,
       },
       {
         id: 'need-3',
         label: 'Need 3',
+        targetId: 'target-1',
         durationSeconds: 18,
       },
     ],

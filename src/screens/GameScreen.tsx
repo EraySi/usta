@@ -4,6 +4,7 @@ import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { GameBoard } from '../components/GameBoard';
 import { PipeTray } from '../components/PipeTray';
 import type { BoardCellModel, GameBoardModel } from '../game/models/board';
+import { getGameOutcome } from '../game/engine/gameOutcome';
 import type { AvailablePiece } from '../game/models/level';
 import type { NeedTimerState } from '../game/models/need';
 import type { PipeType } from '../game/models/pipes';
@@ -61,6 +62,14 @@ export function GameScreen({ navigate, levelId }: GameScreenProps) {
     return () => clearTimeout(timeoutId);
   }, [needState]);
 
+  useEffect(() => {
+    const outcome = getGameOutcome(board, needState);
+
+    if (outcome) {
+      navigate(outcome);
+    }
+  }, [board, navigate, needState]);
+
   if (!loadedLevel || !board) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -103,6 +112,7 @@ export function GameScreen({ navigate, levelId }: GameScreenProps) {
   }
 
   const canPlaceSelectedPipe =
+    !needState?.isExpired &&
     selectedPipeType !== null &&
     hasAvailablePiece(availablePieces, selectedPipeType);
 
@@ -119,6 +129,9 @@ export function GameScreen({ navigate, levelId }: GameScreenProps) {
           <Text style={styles.needLabel}>Active Need</Text>
           <Text style={styles.needTitle}>
             {needState?.activeNeed?.label ?? 'No active need'}
+          </Text>
+          <Text style={styles.needTarget}>
+            Target: {needState?.activeNeed?.targetId ?? 'None'}
           </Text>
           <Text
             style={[
@@ -141,14 +154,9 @@ export function GameScreen({ navigate, levelId }: GameScreenProps) {
           onSelectPipeType={setSelectedPipeType}
         />
 
-        <View style={styles.actions}>
-          <Pressable onPress={() => navigate('win')} style={styles.button}>
-            <Text style={styles.buttonText}>Simulate Win</Text>
-          </Pressable>
-          <Pressable onPress={() => navigate('lose')} style={styles.button}>
-            <Text style={styles.buttonText}>Simulate Lose</Text>
-          </Pressable>
-        </View>
+        <Text style={styles.helperText}>
+          Connect the source to the active target before the timer ends.
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -210,7 +218,12 @@ const styles = StyleSheet.create({
     color: '#111111',
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 6,
+  },
+  needTarget: {
+    color: '#666666',
+    fontSize: 14,
+    marginBottom: 10,
   },
   countdown: {
     color: '#0F766E',
@@ -224,6 +237,13 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 12,
     marginTop: 24,
+  },
+  helperText: {
+    color: '#666666',
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 20,
+    textAlign: 'center',
   },
   button: {
     minHeight: 48,
