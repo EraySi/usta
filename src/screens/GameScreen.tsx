@@ -1,22 +1,50 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 import { GameBoard } from '../components/GameBoard';
-import { WORLD_1_LEVELS } from '../game/data';
+import { PipeTray } from '../components/PipeTray';
+import type { BoardCellModel, GameBoardModel } from '../game/models/board';
+import type { AvailablePiece } from '../game/models/level';
+import type { NeedTimerState } from '../game/models/need';
+import type { PipeType } from '../game/models/pipes';
 import { loadLevel } from '../game/engine/levelLoader';
+import {
+  consumeAvailablePiece,
+  getFirstAvailablePipeType,
+  hasAvailablePiece,
+  placePipeOnBoard,
+} from '../game/engine/pipePlacement';
 import {
   createNeedTimerState,
   tickNeedTimerState,
 } from '../game/engine/needTimer';
-import type { ScreenProps } from './types';
+import type { GameScreenProps } from './types';
 
-const selectedLevel = WORLD_1_LEVELS[0];
-const loadedLevel = selectedLevel ? loadLevel(selectedLevel.id) : null;
+export function GameScreen({ navigate, levelId }: GameScreenProps) {
+  const loadedLevel = useMemo(() => {
+    return levelId ? loadLevel(levelId) : null;
+  }, [levelId]);
+  const [board, setBoard] = useState<GameBoardModel | null>(null);
+  const [availablePieces, setAvailablePieces] = useState<AvailablePiece[]>([]);
+  const [selectedPipeType, setSelectedPipeType] = useState<PipeType | null>(null);
+  const [needState, setNeedState] = useState<NeedTimerState | null>(null);
 
-export function GameScreen({ navigate }: ScreenProps) {
-  const [needState, setNeedState] = useState(() =>
-    loadedLevel ? createNeedTimerState(loadedLevel.level) : null,
-  );
+  useEffect(() => {
+    if (!loadedLevel) {
+      setBoard(null);
+      setAvailablePieces([]);
+      setSelectedPipeType(null);
+      setNeedState(null);
+      return;
+    }
+
+    setBoard(loadedLevel.board);
+    setAvailablePieces(loadedLevel.level.availablePieces.map((piece) => ({ ...piece })));
+    setSelectedPipeType(
+      getFirstAvailablePipeType(loadedLevel.level.availablePieces),
+    );
+    setNeedState(createNeedTimerState(loadedLevel.level));
+  }, [loadedLevel]);
 
   useEffect(() => {
     if (!needState?.activeNeed || needState.isExpired) {
@@ -32,7 +60,7 @@ export function GameScreen({ navigate }: ScreenProps) {
     return () => clearTimeout(timeoutId);
   }, [needState]);
 
-  if (!loadedLevel) {
+  if (!loadedLevel || !board) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
@@ -48,6 +76,33 @@ export function GameScreen({ navigate }: ScreenProps) {
       </SafeAreaView>
     );
   }
+
+  function handleBoardCellPress(cell: BoardCellModel) {
+    if (
+      !board ||
+      !selectedPipeType ||
+      !hasAvailablePiece(availablePieces, selectedPipeType)
+    ) {
+      return;
+    }
+
+    const nextBoard = placePipeOnBoard(board, cell, selectedPipeType);
+    const nextAvailablePieces = consumeAvailablePiece(
+      availablePieces,
+      selectedPipeType,
+    );
+
+    setBoard(nextBoard);
+    setAvailablePieces(nextAvailablePieces);
+
+    if (!hasAvailablePiece(nextAvailablePieces, selectedPipeType)) {
+      setSelectedPipeType(getFirstAvailablePipeType(nextAvailablePieces));
+    }
+  }
+
+  const canPlaceSelectedPipe =
+    selectedPipeType !== null &&
+    hasAvailablePiece(availablePieces, selectedPipeType);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -73,7 +128,16 @@ export function GameScreen({ navigate }: ScreenProps) {
           </Text>
         </View>
 
-        <GameBoard board={loadedLevel.board} />
+        <GameBoard
+          board={board}
+          onCellPress={canPlaceSelectedPipe ? handleBoardCellPress : undefined}
+        />
+
+        <PipeTray
+          availablePieces={availablePieces}
+          selectedPipeType={selectedPipeType}
+          onSelectPipeType={setSelectedPipeType}
+        />
 
         <View style={styles.actions}>
           <Pressable onPress={() => navigate('win')} style={styles.button}>
