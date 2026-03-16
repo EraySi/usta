@@ -76,9 +76,11 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 360,
     aspectRatio: 1,
-    borderWidth: 1,
-    borderColor: '#111111',
-    backgroundColor: '#F6F6F6',
+    borderRadius: 28,
+    overflow: 'hidden',
+    borderWidth: 4,
+    borderColor: '#35576B',
+    backgroundColor: '#E7D7BA',
   },
   row: {
     flex: 1,
@@ -89,27 +91,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#111111',
-    backgroundColor: '#FFFFFF',
+    borderColor: '#CBB28D',
+    backgroundColor: '#FFFDF8',
   },
   placeableCell: {
-    backgroundColor: '#FCFCFC',
+    backgroundColor: '#FFF7EA',
   },
   pressedCell: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F2E0C5',
   },
   blockedCell: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#C8B8A2',
   },
   sourceCell: {
-    backgroundColor: '#DBEAFE',
+    backgroundColor: '#CFE6F2',
   },
   targetCell: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#D9F0DD',
   },
   markerText: {
-    color: '#111111',
-    fontSize: 16,
-    fontWeight: '700',
+    color: '#173042',
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

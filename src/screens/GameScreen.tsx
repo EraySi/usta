@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { GameBoard } from '../components/GameBoard';
+import { GameHud } from '../components/GameHud';
+import { HouseView } from '../components/HouseView';
 import { PipeTray } from '../components/PipeTray';
 import type { BoardCellModel, GameBoardModel } from '../game/models/board';
 import { getGameOutcome } from '../game/engine/gameOutcome';
@@ -127,48 +136,78 @@ export function GameScreen({ navigate, levelId, onWinLevel }: GameScreenProps) {
     !needState?.isExpired &&
     selectedPipeType !== null &&
     hasAvailablePiece(availablePieces, selectedPipeType);
+  const countdownLabel = formatCountdown(needState?.remainingSeconds ?? 0);
+  const activeTargetId = needState?.activeNeed?.targetId ?? null;
+  const houseTargets = loadedLevel.level.targets.map((target) => ({
+    id: target.id,
+    isActive: target.id === activeTargetId,
+  }));
+  const activeTargetIndex = loadedLevel.level.targets.findIndex(
+    (target) => target.id === activeTargetId,
+  );
+  const activeTargetLabel =
+    activeTargetIndex === -1 ? 'Waiting' : `Room ${activeTargetIndex + 1}`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.content}>
-        <Text style={styles.title}>{loadedLevel.level.name}</Text>
-        <Text style={styles.subtitle}>
-          World {loadedLevel.level.world} · {loadedLevel.level.gridSize}x
-          {loadedLevel.level.gridSize} board loaded from local level data.
-        </Text>
+      <View style={styles.screen}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <GameHud
+            countdownLabel={countdownLabel}
+            gridSize={loadedLevel.level.gridSize}
+            isExpired={Boolean(needState?.isExpired)}
+            levelName={loadedLevel.level.name}
+            world={loadedLevel.level.world}
+          />
 
-        <View style={styles.needCard}>
-          <Text style={styles.needLabel}>Active Need</Text>
-          <Text style={styles.needTitle}>
-            {needState?.activeNeed?.label ?? 'No active need'}
-          </Text>
-          <Text style={styles.needTarget}>
-            Target: {needState?.activeNeed?.targetId ?? 'None'}
-          </Text>
-          <Text
-            style={[
-              styles.countdown,
-              needState?.isExpired && styles.countdownExpired,
-            ]}
-          >
-            {formatCountdown(needState?.remainingSeconds ?? 0)}
-          </Text>
-        </View>
+          <HouseView
+            activeNeedLabel={needState?.activeNeed?.label ?? 'No active need'}
+            activeTargetId={activeTargetId}
+            countdownLabel={countdownLabel}
+            isExpired={Boolean(needState?.isExpired)}
+            targets={houseTargets}
+          />
 
-        <GameBoard
-          board={board}
-          onCellPress={canPlaceSelectedPipe ? handleBoardCellPress : undefined}
-        />
+          <View style={styles.boardSection}>
+            <View style={styles.boardHeader}>
+              <View style={styles.boardHeadingText}>
+                <Text style={styles.boardLabel}>Pipe Yard</Text>
+                <Text style={styles.boardTitle}>Build the route</Text>
+                <Text style={styles.boardSubtitle}>
+                  Lay pieces on the board and send water into the highlighted fixture.
+                </Text>
+              </View>
+
+              <View style={styles.boardTargetBadge}>
+                <Text style={styles.boardTargetBadgeLabel}>Deliver To</Text>
+                <Text style={styles.boardTargetBadgeValue}>
+                  {activeTargetLabel}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.boardFrame}>
+              <View style={styles.boardShadow} />
+              <GameBoard
+                board={board}
+                onCellPress={canPlaceSelectedPipe ? handleBoardCellPress : undefined}
+              />
+            </View>
+
+            <Text style={styles.helperText}>
+              Choose a pipe from the tray, then tap an open tile to place it.
+            </Text>
+          </View>
+        </ScrollView>
 
         <PipeTray
           availablePieces={availablePieces}
           selectedPipeType={selectedPipeType}
           onSelectPipeType={setSelectedPipeType}
         />
-
-        <Text style={styles.helperText}>
-          Connect the source to the active target before the timer ends.
-        </Text>
       </View>
     </SafeAreaView>
   );
@@ -185,7 +224,10 @@ function formatCountdown(totalSeconds: number): string {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#EFE1C3',
+  },
+  screen: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -194,67 +236,109 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 24,
   },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 16,
+  },
   title: {
-    color: '#111111',
+    color: '#173042',
     fontSize: 30,
-    fontWeight: '700',
-    marginBottom: 12,
+    fontWeight: '800',
+    marginBottom: 10,
     textAlign: 'center',
   },
   subtitle: {
-    color: '#666666',
+    color: '#5E6E75',
     fontSize: 16,
     lineHeight: 22,
-    marginBottom: 16,
     textAlign: 'center',
-  },
-  needCard: {
-    width: '100%',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#111111',
-    backgroundColor: '#F7F7F7',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 20,
-  },
-  needLabel: {
-    color: '#666666',
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    marginBottom: 6,
-  },
-  needTitle: {
-    color: '#111111',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  needTarget: {
-    color: '#666666',
-    fontSize: 14,
-    marginBottom: 10,
-  },
-  countdown: {
-    color: '#0F766E',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  countdownExpired: {
-    color: '#B91C1C',
   },
   actions: {
     width: '100%',
     gap: 12,
     marginTop: 24,
   },
-  helperText: {
-    color: '#666666',
+  boardSection: {
+    width: '100%',
+    borderRadius: 30,
+    backgroundColor: '#FCF5E6',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E0C9A4',
+  },
+  boardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 16,
+  },
+  boardHeadingText: {
+    flex: 1,
+  },
+  boardLabel: {
+    color: '#9A6D3E',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  boardTitle: {
+    color: '#243A42',
+    fontSize: 23,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  boardSubtitle: {
+    color: '#6B6055',
+    fontSize: 13,
+    lineHeight: 18,
+    maxWidth: 210,
+  },
+  boardTargetBadge: {
+    minWidth: 96,
+    borderRadius: 20,
+    backgroundColor: '#E7F2E5',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  boardTargetBadgeLabel: {
+    color: '#2F7253',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.7,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  boardTargetBadgeValue: {
+    color: '#174C37',
     fontSize: 14,
-    lineHeight: 20,
-    marginTop: 20,
+    fontWeight: '800',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  boardFrame: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+    marginBottom: 12,
+  },
+  boardShadow: {
+    position: 'absolute',
+    top: 22,
+    width: '86%',
+    height: '88%',
+    borderRadius: 28,
+    backgroundColor: '#D7C3A2',
+  },
+  helperText: {
+    color: '#6B6055',
+    fontSize: 12,
+    lineHeight: 18,
     textAlign: 'center',
   },
   button: {

@@ -17,8 +17,17 @@ export function PipeTray({
 }: PipeTrayProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Pipe Tray</Text>
-      <Text style={styles.subtitle}>Tap a pipe, then tap an empty cell.</Text>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Toolbox</Text>
+          <Text style={styles.subtitle}>Pick a pipe piece and drop it onto the board.</Text>
+        </View>
+        <View style={styles.selectionBadge}>
+          <Text style={styles.selectionLabel}>
+            {selectedPipeType ? 'Ready' : 'Choose'}
+          </Text>
+        </View>
+      </View>
 
       <View style={styles.row}>
         {availablePieces.map((piece) => {
@@ -54,25 +63,51 @@ export function PipeTray({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 14,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderWidth: 1,
-    borderColor: '#111111',
-    backgroundColor: '#F7F7F7',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginTop: 20,
+    borderBottomWidth: 0,
+    borderColor: '#CDAF7A',
+    backgroundColor: '#E8B769',
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 14,
+    shadowColor: '#93652D',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 12,
   },
   title: {
-    color: '#111111',
-    fontSize: 16,
-    fontWeight: '700',
+    color: '#533618',
+    fontSize: 17,
+    fontWeight: '800',
     marginBottom: 4,
   },
   subtitle: {
-    color: '#666666',
+    color: '#734D28',
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 12,
+  },
+  selectionBadge: {
+    borderRadius: 16,
+    backgroundColor: '#F6DCA9',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  selectionLabel: {
+    color: '#72491D',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   row: {
     flexDirection: 'row',
@@ -81,16 +116,16 @@ const styles = StyleSheet.create({
   pieceButton: {
     flex: 1,
     alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#D3AF71',
+    backgroundColor: '#FAE6BC',
     paddingHorizontal: 8,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   selectedPieceButton: {
-    borderColor: '#111111',
-    backgroundColor: '#F3F4F6',
+    borderColor: '#173042',
+    backgroundColor: '#FFF8EA',
   },
   disabledPieceButton: {
     opacity: 0.45,
@@ -101,15 +136,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   pieceName: {
-    color: '#111111',
+    color: '#5B4126',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
     textTransform: 'capitalize',
     marginBottom: 4,
   },
   pieceCount: {
-    color: '#666666',
+    color: '#8A6D49',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
